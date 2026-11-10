@@ -1,0 +1,189 @@
+{
+  "$comment": "Goal OS v2 — 长在《SODA AI 汇报与目标对齐机制》上的周/月目标工具。schema 是唯一事实源：建表脚本与 Skill 都从这里读字段名。上线后字段名不改，只新增。",
+  "base_name": "SODA 目标管理台 · Goal OS",
+  "time_zone": "Asia/Shanghai",
+  "policy": {
+    "source": "Soda Docs/Policies/SODA AI 汇报与目标对齐机制.pdf",
+    "chain": ["公司大目标", "季度目标", "月度计划", "周目标"],
+    "weekly": { "deadline": "每周日 22:30", "draft_to_lead": "周日 10:30 前草稿交团队负责人", "final": "周日 22:30 前发送 Contana" },
+    "monthly": { "meeting": "每月最后一个工作日 10:30–13:30", "prep": "书面月报提前一天发出", "tie": "与绩效直接关联" }
+  },
+  "tables": [
+    {
+      "name": "周期",
+      "purpose": "时间容器，承载截止时间。周 = 周日 22:30；月 = 最后工作日会议 + 提前一天发出书面报告。",
+      "fields": [
+        { "name": "周期", "type": "text", "description": "标识：2026-W45 / 2026-11 / 2026-Q4 / 2026。唯一，Skill 用它定位。" },
+        { "name": "类型", "type": "select", "multiple": false, "options": [
+          { "name": "周", "hue": "Blue" }, { "name": "月", "hue": "Green" },
+          { "name": "季", "hue": "Purple" }, { "name": "年", "hue": "Orange" }
+        ] },
+        { "name": "开始日期", "type": "datetime", "style": { "format": "yyyy-MM-dd" } },
+        { "name": "结束日期", "type": "datetime", "style": { "format": "yyyy-MM-dd" } },
+        { "name": "截止时间", "type": "datetime", "style": { "format": "yyyy-MM-dd HH:mm" }, "description": "周：周日 22:30。月：书面报告发出截止（会议前一天）。Skill 据此算倒计时。" },
+        { "name": "会议时间", "type": "datetime", "style": { "format": "yyyy-MM-dd HH:mm" }, "description": "仅月/季周期使用：月度会议 10:30–13:30。" },
+        { "name": "状态", "type": "select", "multiple": false, "default_value": ["进行中"], "options": [
+          { "name": "未开始", "hue": "Gray" }, { "name": "进行中", "hue": "Blue" },
+          { "name": "已回顾", "hue": "Green" }, { "name": "已归档", "hue": "Gray", "lightness": "Dark" }
+        ] }
+      ]
+    },
+    {
+      "name": "目标",
+      "purpose": "目标本体。层级沿 policy.chain 逐层承接，对齐上级 构成目标树——这是'目标对齐'的唯一实现方式。",
+      "fields": [
+        { "name": "目标", "type": "text", "description": "动词开头、可核对。对上承接哪个目标，写在 对齐上级。" },
+        { "name": "周期", "type": "link", "link_table": "周期" },
+        { "name": "层级", "type": "select", "multiple": false, "default_value": ["周目标"], "options": [
+          { "name": "公司大目标", "hue": "Red" }, { "name": "季度目标", "hue": "Orange" },
+          { "name": "月度计划", "hue": "Yellow" }, { "name": "周目标", "hue": "Blue" }
+        ] },
+        { "name": "负责人", "type": "user", "multiple": false, "default_value": [{ "$slot": "current_user" }] },
+        { "name": "状态", "type": "select", "multiple": false, "default_value": ["进行中"], "options": [
+          { "name": "草稿", "hue": "Gray" }, { "name": "进行中", "hue": "Blue" },
+          { "name": "达成", "hue": "Green" }, { "name": "未达成", "hue": "Red" },
+          { "name": "延期", "hue": "Orange" }, { "name": "已放弃", "hue": "Gray", "lightness": "Dark" }
+        ] },
+        { "name": "对齐上级", "type": "link", "link_table": "目标", "description": "周目标→月度计划→季度目标→公司大目标。公司大目标留空。" },
+        { "name": "权重", "type": "number", "style": { "type": "plain", "precision": 0 }, "description": "同期内相对权重，建议合计 100。" },
+        { "name": "备注", "type": "text", "description": "未达成原因、补救安排、依赖谁。" },
+        { "name": "创建时间", "type": "created_at", "style": { "format": "yyyy-MM-dd" } }
+      ]
+    },
+    {
+      "name": "关键结果",
+      "purpose": "把目标变成可核对的数字。周报里'只写事实与数字'的纪律，靠这里落地。",
+      "fields": [
+        { "name": "KR", "type": "text", "description": "含指标与数值，例如 '周活跃客户 12 → 20'。" },
+        { "name": "所属目标", "type": "link", "link_table": "目标" },
+        { "name": "类型", "type": "select", "multiple": false, "default_value": ["数字"], "options": [
+          { "name": "数字", "hue": "Blue" }, { "name": "里程碑", "hue": "Purple" }, { "name": "二值", "hue": "Gray" }
+        ] },
+        { "name": "起始值", "type": "number", "style": { "type": "plain", "precision": 2 } },
+        { "name": "目标值", "type": "number", "style": { "type": "plain", "precision": 2 } },
+        { "name": "当前值", "type": "number", "style": { "type": "plain", "precision": 2 } },
+        { "name": "单位", "type": "text" },
+        { "name": "状态", "type": "select", "multiple": false, "default_value": ["进行中"], "options": [
+          { "name": "未开始", "hue": "Gray" }, { "name": "进行中", "hue": "Blue" },
+          { "name": "达成", "hue": "Green" }, { "name": "未达成", "hue": "Red" },
+          { "name": "风险", "hue": "Orange" }
+        ] }
+      ]
+    },
+    {
+      "name": "进展",
+      "purpose": "流水账。写周报时不必回忆，直接从本期流水里取事实与数字。",
+      "fields": [
+        { "name": "记录", "type": "text", "description": "一句话事实，例如 '客户现场部署复现成功'。" },
+        { "name": "目标", "type": "link", "link_table": "目标" },
+        { "name": "日期", "type": "datetime", "style": { "format": "yyyy-MM-dd" }, "default_value": { "$slot": "record_created_time" } },
+        { "name": "数值", "type": "number", "style": { "type": "plain", "precision": 2 }, "description": "更新后的当前值，没有数字就留空。" },
+        { "name": "链接", "type": "text", "style": { "type": "url" }, "description": "交付物/文档链接。月报'关键成果及链接'直接取这里。" },
+        { "name": "风险", "type": "select", "multiple": false, "default_value": ["无"], "options": [
+          { "name": "无", "hue": "Green" }, { "name": "有风险", "hue": "Orange" }, { "name": "阻塞", "hue": "Red" }
+        ] }
+      ]
+    },
+    {
+      "name": "周报",
+      "purpose": "两栏七要素，严格对齐 policy.weekly。本周回顾对照的是上周写的下周目标。",
+      "fields": [
+        { "name": "标题", "type": "text", "description": "例如 '2026-W45 周报'。" },
+        { "name": "周期", "type": "link", "link_table": "周期" },
+        { "name": "提交人", "type": "user", "multiple": false, "default_value": [{ "$slot": "current_user" }] },
+        { "name": "本周目标达成", "type": "text", "description": "对照上周目标逐条核对：达成就是达成，未达成写原因与补救。" },
+        { "name": "本周结果", "type": "text", "description": "交付物与数据说话，附链接。禁止'做了很多事'。" },
+        { "name": "本周风险", "type": "text", "description": "已发生或预见的问题、影响范围。" },
+        { "name": "下周目标", "type": "text", "description": "写完后由 Skill 落成下周期的 周目标 记录，供下周对照。" },
+        { "name": "预期结果", "type": "text" },
+        { "name": "潜在风险", "type": "text" },
+        { "name": "所需援助", "type": "text", "description": "写给谁、要什么。与成果写在同一份报告里。" },
+        { "name": "状态", "type": "select", "multiple": false, "default_value": ["草稿"], "options": [
+          { "name": "草稿", "hue": "Gray" }, { "name": "已交负责人", "hue": "Blue" },
+          { "name": "已发Contana", "hue": "Green" }
+        ] },
+        { "name": "提交时间", "type": "datetime", "style": { "format": "yyyy-MM-dd HH:mm" } }
+      ]
+    },
+    {
+      "name": "月报",
+      "purpose": "七项内容清单，严格对齐 policy.monthly。与绩效直接关联，会前由全员互读。",
+      "fields": [
+        { "name": "标题", "type": "text", "description": "例如 '2026-11 月报'。" },
+        { "name": "周期", "type": "link", "link_table": "周期" },
+        { "name": "提交人", "type": "user", "multiple": false, "default_value": [{ "$slot": "current_user" }] },
+        { "name": "本月达成目标", "type": "text", "description": "对照月初计划逐条核对，写明完成度。" },
+        { "name": "关键成果及链接", "type": "text", "description": "交付物、文档、上线功能，全部附可点击链接。" },
+        { "name": "Lesson Learned", "type": "text", "description": "做对了什么、踩了什么坑、下次怎么避免。" },
+        { "name": "能力成长", "type": "text", "description": "新掌握的技能、方法与认知升级。" },
+        { "name": "产品建议", "type": "text", "description": "来自一线的产品改进与功能建议。" },
+        { "name": "市场洞察", "type": "text", "description": "客户、竞品、行业趋势的一线观察。" },
+        { "name": "开放项", "type": "text", "description": "框架之外的思考——最有价值的洞察常在这里。" },
+        { "name": "下月计划", "type": "text", "description": "必须注明所属季度目标与对应公司大目标（对齐链条）。" },
+        { "name": "状态", "type": "select", "multiple": false, "default_value": ["草稿"], "options": [
+          { "name": "草稿", "hue": "Gray" }, { "name": "已发出", "hue": "Green" }
+        ] },
+        { "name": "发出时间", "type": "datetime", "style": { "format": "yyyy-MM-dd HH:mm" } }
+      ]
+    },
+    {
+      "name": "人员",
+      "purpose": "公司人员骨架：谁向谁汇报、用哪个 agent。对齐链条的起点是涛哥，这张表决定谁能对齐到谁。",
+      "fields": [
+        { "name": "姓名", "type": "text", "description": "真实姓名，例如 Alex Chen。" },
+        { "name": "飞书账号", "type": "user", "multiple": false, "description": "用于把飞书消息里的 open_id 映射到这个人。" },
+        { "name": "岗位", "type": "text", "description": "例如 创始人 / 产品 / 交付。" },
+        { "name": "汇报对象", "type": "link", "link_table": "人员", "description": "指向直接汇报对象。涛哥留空——他是链条顶端。" },
+        { "name": "所属团队", "type": "text" },
+        { "name": "常用Agent", "type": "text", "description": "这个人平时用哪个 agent 干活，对应 Soda AI Guys 目录。" },
+        { "name": "状态", "type": "select", "multiple": false, "default_value": ["在职"], "options": [
+          { "name": "在职", "hue": "Green" }, { "name": "休假", "hue": "Yellow" }, { "name": "离职", "hue": "Gray" }
+        ] }
+      ]
+    }
+  ],
+  "derived_fields": [
+    {
+      "table": "关键结果",
+      "name": "进度",
+      "type": "formula",
+      "expression": "IFERROR(IF([目标值] = [起始值], IF([当前值] >= [目标值], 1, 0), ([当前值] - [起始值]) / ([目标值] - [起始值])), 0)"
+    },
+    {
+      "table": "目标",
+      "name": "对齐检查",
+      "type": "formula",
+      "expression": "IF(OR([层级] = \"公司大目标\", NOT(ISBLANK([对齐上级]))), \"已对齐\", \"未对齐\")",
+      "why": "偏离检测：除公司大目标外，没挂上级目标的一律标记未对齐。这是'工作目标不偏离'的机器判据。"
+    },
+    {
+      "table": "目标",
+      "name": "达成率",
+      "type": "formula",
+      "expression": "IFERROR(AVERAGE([关键结果].[进度]), IF([状态] = \"达成\", 1, 0))",
+      "why": "有 KR 用 KR 均值；纯里程碑目标退回状态判定。依赖 关键结果.进度 先建。"
+    }
+  ],
+  "views": [
+    { "table": "目标", "name": "我的 · 本期", "filter": "负责人 = 当前用户 AND 状态 != 已放弃", "sort": "权重 DESC" },
+    { "table": "目标", "name": "对齐链", "group_by": "层级", "note": "公司→季度→月度→周，配合 对齐上级 检查链条有没有断。" },
+    { "table": "目标", "name": "未达成与延期", "filter": "状态 = 未达成 OR 状态 = 延期" },
+    { "table": "周报", "name": "待我提交", "filter": "提交人 = 当前用户 AND 状态 = 草稿" },
+    { "table": "月报", "name": "待我提交", "filter": "提交人 = 当前用户 AND 状态 = 草稿" },
+    { "table": "周期", "name": "当前周期", "filter": "状态 = 进行中", "sort": "开始日期 DESC" }
+  ],
+  "agent_contract": {
+    "principle": "Agent 只调 Skill 暴露的动作，不直接拼 Base 请求。字段名是稳定契约。",
+    "actions": {
+      "status": "我的本周/本月状态：截止倒计时、目标清单、缺口（未写周报/季度链断）",
+      "cycle.open": "确保某周期存在（含截止时间），返回 record_id",
+      "goal.plan": "为某周期批量写入目标 + KR",
+      "goal.list": "按周期/负责人/层级/状态读目标树",
+      "goal.progress": "更新 KR 当前值 + 追加进展流水（带链接）",
+      "goal.align": "设置对齐上级；或把上级目标拆解成本人目标",
+      "week.report": "生成周报草稿：本周回顾对照上周目标 + 下周计划，并把下周目标落成记录",
+      "month.report": "生成月报草稿：七项内容 + 下月计划的对齐链条标注",
+      "lint": "按三条写作纪律自检：只有事实与数字 / 风险与援助齐全 / 一页纸"
+    }
+  }
+}

@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Soda AI Studio — 目标集群</title>
+<style>
+:root{color-scheme:dark;--black:#101110;--line:#343634;--soft:#a4a7a1;--paper:#f4f4f0;--ink:#191a19}
+*{box-sizing:border-box}
+body{margin:0;background:var(--black);color:#f4f4ef;
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif}
+button,select{font:inherit}button{cursor:pointer}
+button:focus-visible,select:focus-visible{outline:3px solid #91aaff;outline-offset:3px}
+.app{display:grid;grid-template-columns:206px minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;border-right:1px solid #30312f;background:#111211;
+  padding:25px 16px;display:flex;flex-direction:column}
+.logo{padding:0 4px 26px;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.logo-img{width:134px;height:auto;display:block}
+.logo-sub{font:10px/1.4 'Courier New',monospace;letter-spacing:.2em;color:#9a9d97}
+.tiny-label{color:#848781;font:10px/1.4 'Courier New',monospace;letter-spacing:.11em;text-transform:uppercase}
+.sidecaption{padding:0 9px 10px}
+.nav{display:grid;gap:4px}
+.nav button{color:#a3a6a0;background:transparent;border:1px solid transparent;border-radius:3px;
+  min-height:44px;text-align:left;padding:10px 12px}
+.nav button.active{background:#eaece6;border-color:#eaece6;color:#151615;font-weight:700}
+.nav button span{display:inline-block;font:12px monospace;margin-right:12px}
+.sidebar-bottom{margin-top:auto;border-top:1px solid #333;padding:17px 9px 0;color:#9a9d97;font-size:12px}
+.sidebar-bottom strong{color:#f2f2eb;display:block;font-size:13px;margin-bottom:4px}
+.main{min-width:0}
+.top{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;
+  border-bottom:1px solid #30312f}
+.top-left{font-size:13px;color:#92968e}
+.top-left b{color:#e7e9e3;font-weight:500}
+.top-right{display:flex;gap:10px;align-items:center}
+.theme-toggle{background:transparent;border:1px solid #4a4c48;color:#c8cbc3;font-size:12px;
+  padding:6px 11px;border-radius:3px}
+.demo-label{font:11px 'Courier New',monospace;letter-spacing:.05em;color:#1a1b1a;background:#e6e7df;
+  padding:6px 9px}
+.circle{width:28px;height:28px;border:1px solid #686a66;border-radius:50%;display:grid;
+  place-items:center;font:11px monospace}
+.mobile-nav{display:none}
+.wrap{max-width:1540px;margin:0 auto;padding:38px 36px 70px}
+.title-row{display:flex;justify-content:space-between;align-items:end;gap:20px}
+.section-code{font:11px 'Courier New',monospace;letter-spacing:.12em;color:#a5a8a1}
+.title-row h1{font-size:32px;line-height:1.2;letter-spacing:-.04em;margin:12px 0 8px}
+.title-row p{margin:0;color:#a0a39d;font-size:14px}
+.cycle{border-left:1px solid #4a4c48;padding-left:18px;color:#babdb5;font-size:12px}
+.cycle strong{display:block;font:700 16px 'Courier New',monospace;color:#f6f6f0;margin-top:5px}
+.notice{border:1px solid #50524c;color:#b9bcb4;background:#1c1d1b;margin:28px 0;padding:11px 14px;
+  display:flex;gap:12px;font-size:12px}
+.notice strong{color:white}
+.notice .notice-icon{font-family:monospace;color:#fff;white-space:nowrap;flex:none}
+.page{display:none}.page.show{display:block}
+.section-bar{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:15px}
+.section-bar h2{font-size:19px;margin:3px 0 0}
+.section-bar p{margin:0;color:#969992;font-size:12px}
+.section-index{font:11px 'Courier New',monospace;letter-spacing:.1em;color:#b3b6af}
+.cluster-frame{border:1px solid #3c3e3a;background:#161716;padding:24px 20px 20px;position:relative}
+.cluster-frame:before{content:'';position:absolute;left:13%;right:13%;top:24px;height:1px;background:#666a62}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.badge-wrap{position:relative;padding-top:19px;min-width:0}
+.badge-wrap:before{content:'';position:absolute;top:0;left:50%;height:19px;border-left:1px solid #747871}
+.badge-wrap:after{content:'';position:absolute;top:15px;left:calc(50% - 11px);width:22px;height:4px;
+  background:#252625;border-radius:3px;z-index:1}
+.badge{height:100%;background:var(--paper);color:var(--ink);border-radius:8px;padding:8px;
+  box-shadow:0 1px 0 #9da09a;min-height:237px;display:flex;flex-direction:column}
+.badge-top{background:#151615;color:white;border-radius:4px;padding:5px 8px;
+  font:11px/1.2 'Courier New',monospace;letter-spacing:.02em;display:flex;justify-content:space-between;gap:8px}
+.badge-body{padding:17px 8px 7px;display:flex;flex-direction:column;flex:1}
+.avatar{width:59px;height:59px;border:1px solid #d7d9d1;border-radius:4px;background:#fafaf7;
+  display:grid;place-items:center;color:#777c74;margin-bottom:14px;position:relative;overflow:hidden}
+.avatar span{font:10px/1.2 'Courier New',monospace;text-align:center;letter-spacing:.01em}
+.avatar.goal-avatar{background:#f5f5f0;font:700 25px 'Courier New',monospace;color:#272a26}
+.avatar img{width:100%;height:100%;object-fit:cover;filter:grayscale(1)}
+.badge h3{font-size:15px;line-height:1.25;margin:0 0 5px}
+.badge .role{font-size:12px;color:#656a62;margin:0}
+.badge .desc{font-size:12px;color:#858981;line-height:1.45;margin:12px 0 5px}
+.badge-foot{border-top:1px dashed #c7c9c1;display:flex;align-items:center;justify-content:space-between;
+  gap:6px;margin-top:auto;padding:8px 7px 1px}
+.badge-foot b{font:700 14px 'Courier New',monospace;letter-spacing:-.06em}
+.badge-foot span{border-radius:3px;background:#202120;color:white;padding:4px 7px;font-size:10px;white-space:nowrap}
+.badge-foot span.drift{background:#7d2f1e}
+.footer-note{display:flex;justify-content:space-between;gap:20px;margin-top:18px;color:#a1a49d;font-size:12px}
+.link-button{border:0;background:none;color:#f2f3ed;text-decoration:underline;text-underline-offset:4px;
+  padding:0;font-size:12px}
+.section-gap{margin-top:37px}
+.overview-grid{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:18px}
+.alignment{border:1px solid #41433f;padding:19px 20px}
+.alignment-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.alignment h3{margin:0;font-size:15px}
+.outlined{font:10px monospace;border:1px solid #62655e;color:#c8cac4;padding:4px 6px}
+.steps{display:flex;align-items:stretch;gap:0;margin:19px 0 14px}
+.step{min-width:0;flex:1;border:1px solid #3c3e3a;padding:10px;background:#1e1f1d}
+.step+.step{border-left:0}
+.step .n{font:10px monospace;color:#a8aca3}
+.step b{font-size:13px;display:block;margin-top:5px}
+.step small{color:#949890;font-size:11px}
+.alignment-foot{display:flex;justify-content:space-between;align-items:center;gap:15px;color:#a5a8a1;font-size:12px}
+.deadline{border:1px solid #41433f;background:#e9eae3;color:#171917;padding:18px 19px;display:flex;flex-direction:column}
+.deadline .tiny-label{color:#666a62}
+.deadline strong{display:block;font:700 24px/1.2 'Courier New',monospace;margin:13px 0 5px;letter-spacing:-.04em}
+.deadline p{margin:0;color:#666b62;font-size:12px}
+.deadline .rule{border-top:1px solid #c8ccc3;margin:14px 0 10px}
+.full-box{border:1px solid #41433f;padding:22px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:21px 0}
+.filter{background:transparent;color:#c4c7c0;border:1px solid #555950;padding:9px 14px;min-height:42px}
+.filter.active{background:#edede8;color:#171817;border-color:#edede8}
+.goal-row{padding:17px 0;border-top:1px solid #383a36;display:grid;grid-template-columns:1fr auto;gap:15px}
+.goal-row h3{font-size:15px;margin:0 0 5px}
+.goal-row p{margin:0;font-size:12px;color:#9da198}
+.goal-actions{display:flex;align-items:center;gap:12px}
+.state{font-size:11px;border:1px solid #73776f;padding:4px 8px;white-space:nowrap}
+.state.no{border-color:#a8563c;color:#e08f74}
+.action{background:#f0f1ec;border:1px solid #f0f1ec;color:#191a19;padding:9px 13px;min-height:42px}
+.chain{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:10px}
+.chain span{padding:6px 9px;border:1px solid #555951;color:#e6e8e1;font-size:12px}
+.people-cards{grid-template-columns:repeat(4,minmax(0,1fr))}
+.people-frame:before{display:none}
+.people-frame .badge-wrap{padding-top:0}
+.people-frame .badge-wrap:before,.people-frame .badge-wrap:after{display:none}
+.people-frame .badge{min-height:235px}
+.people-frame .cards{row-gap:16px}
+.empty{color:#8a8d86;font-size:13px;padding:18px 0}
+.modal-back{position:fixed;inset:0;background:#000b;display:grid;place-items:center;padding:20px;z-index:5}
+.modal{width:min(100%,450px);background:#efefe9;color:#181a18;padding:24px;border-radius:6px}
+.modal h2{font-size:20px;margin:0 0 9px}
+.modal p{font-size:13px;color:#676b64}
+.modal label{display:block;font-size:13px;margin:18px 0 8px;font-weight:700}
+.modal select,.modal input{background:white;color:#222;width:100%;min-height:44px;border:1px solid #afb3aa;padding:8px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.modal-footer button{min-height:42px;border:1px solid #171817;padding:8px 13px;background:transparent;color:#171817}
+.modal-footer .confirm{background:#171817;color:white}
+.toast{position:fixed;bottom:20px;right:20px;background:#efefe9;color:#151615;padding:12px 16px;z-index:8;font-size:12px}
+.hidden{display:none!important}
+@media(max-width:1050px){
+  .wrap{padding-left:25px;padding-right:25px}.top{padding:0 25px}
+  .overview-grid{grid-template-columns:1fr}.cards{gap:10px}
+}
+@media(max-width:700px){
+  .app{display:block}.sidebar{display:none}
+  .top{height:58px;padding:0 16px}.demo-label{display:none}
+  .mobile-nav{display:flex;gap:6px;padding:12px 16px;border-bottom:1px solid #30312f;overflow:auto}
+  .mobile-nav button{background:transparent;border:1px solid #4a4c48;color:#c4c7c0;padding:8px 12px;
+    border-radius:3px;white-space:nowrap;font-size:12px}
+  .mobile-nav button.active{background:#edede8;color:#171817;border-color:#edede8}
+  .wrap{padding:22px 16px 60px}
+  .title-row{display:block}.cycle{border-left:0;padding-left:0;margin-top:14px}
+  .title-row h1{font-size:24px}
+  .cards,.people-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .goal-row{grid-template-columns:1fr}
+}
+/* 白天模式：同一套中性色，明暗互换 */
+body.light{background:#f2f1ec;color:#191a19}
+body.light .sidebar{background:#e9e8e2;border-right-color:#d2d1c9}
+body.light .logo-mark{border-color:#191a19}
+body.light .nav button{color:#5d605a}
+body.light .nav button.active{background:#191a19;color:#f4f4ef;border-color:#191a19}
+body.light .sidebar-bottom{color:#63665f;border-top-color:#d2d1c9}
+body.light .sidebar-bottom strong{color:#191a19}
+body.light .top{background:#f5f4ef;border-bottom-color:#d8d7cf}
+body.light .top-left{color:#6b6e67}body.light .top-left b{color:#191a19}
+body.light .theme-toggle{border-color:#c3c2ba;color:#3d3f3a}
+body.light .demo-label{background:#191a19;color:#f4f4ef}
+body.light .circle{border-color:#b6b5ad}
+body.light .section-code,body.light .section-index{color:#8b8e86}
+body.light .title-row p,body.light .section-bar p{color:#63665f}
+body.light .cycle{border-left-color:#cfcec6;color:#63665f}
+body.light .cycle strong{color:#191a19}
+body.light .notice{background:#e7e6df;border-color:#cfcec6;color:#4d504a}
+body.light .notice strong{color:#191a19}
+body.light .cluster-frame{background:#ecebe4;border-color:#cdccc4}
+body.light .cluster-frame:before{background:#b6b5ad}
+body.light .badge-wrap:before{border-left-color:#a9a8a0}
+body.light .badge-wrap:after{background:#d8d7cf}
+body.light .badge{background:#fff;box-shadow:0 1px 0 #cfcec6}
+body.light .badge .role{color:#5d605a}
+body.light .badge .desc{color:#787c74}
+body.light .badge-foot{border-top-color:#e2e1d9}
+body.light .alignment,body.light .full-box{border-color:#cdccc4}
+body.light .step{background:#f5f4ef;border-color:#d8d7cf}
+body.light .step .n,body.light .step small{color:#71756d}
+body.light .alignment-foot,body.light .footer-note{color:#63665f}
+body.light .outlined{border-color:#b6b5ad;color:#4d504a}
+body.light .filter{border-color:#c3c2ba;color:#3d3f3a}
+body.light .filter.active{background:#191a19;color:#f4f4ef;border-color:#191a19}
+body.light .goal-row{border-top-color:#d8d7cf}
+body.light .goal-row p{color:#71756d}
+body.light .state{border-color:#b6b5ad;color:#3d3f3a}
+body.light .state.no{border-color:#b4402a;color:#8f3320}
+body.light .action{background:#191a19;border-color:#191a19;color:#f4f4ef}
+body.light .chain span{border-color:#c3c2ba;color:#2b2d29}
+body.light .empty{color:#71756d}
+body.light .link-button{color:#191a19}
+body.light .toast{background:#191a19;color:#f4f4ef}
+
+/* 登录 / 后台 / 表单 */
+.auth{position:fixed;inset:0;background:#101110;display:grid;place-items:center;z-index:20;padding:20px}
+.auth-card{width:min(100%,380px);background:#f4f4f0;color:#191a19;padding:28px;border-radius:6px}
+.auth-card h2{margin:0 0 6px;font-size:20px;letter-spacing:-.03em}
+.auth-card p{margin:0 0 20px;font-size:12px;color:#666b62}
+.auth-card label{display:block;font-size:12px;font-weight:700;margin:14px 0 6px}
+.auth-card{color-scheme:light}
+.auth-card input{width:100%;min-height:44px;border:1px solid #afb3aa;padding:9px;background:#fff;color:#191a19;font-size:14px}
+.auth-card input::placeholder{color:#9a9d97;opacity:1}
+.auth-card input:focus{outline:2px solid #191a19;outline-offset:1px}
+.auth-card button{width:100%;min-height:44px;margin-top:20px;background:#191a19;color:#f4f4ef;border:0;font-weight:700}
+.auth-err{color:#b4402a;font-size:12px;margin-top:10px;min-height:18px}
+.field{display:grid;gap:6px;margin-bottom:12px}
+.field label{font-size:12px;color:#9a9d97;font-weight:600}
+.field input,.field select,.field textarea{background:#1a1b19;border:1px solid #3a3c38;color:#ecebe6;padding:9px;width:100%;font:inherit;font-size:13px}
+.field textarea{min-height:64px;resize:vertical}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.admin-card{border:1px solid #3c3e3a;background:#161716;padding:16px}
+.admin-card h3{margin:0 0 12px;font-size:14px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{background:#f0f1ec;border:1px solid #f0f1ec;color:#191a19;padding:8px 13px;min-height:38px;font:inherit;font-size:12.5px}
+.btn.ghost{background:transparent;color:#c4c7c0;border-color:#555950}
+.btn.danger{background:transparent;color:#e08f74;border-color:#7d3a28}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{text-align:left;color:#9a9d97;font-weight:600;padding:8px 6px;border-bottom:1px solid #3a3c38;font-family:'Courier New',monospace;font-size:11px}
+.tbl td{padding:8px 6px;border-bottom:1px solid #2a2c28;vertical-align:top}
+.codeblock{background:#0c0d0c;border:1px solid #343634;padding:12px 14px;font-family:'Courier New',monospace;font-size:11.5px;color:#cfd2ca;overflow:auto;white-space:pre;line-height:1.7}
+.note-line{color:#8e918a;font-size:12px;margin:8px 0 0}
+body.light .admin-card{background:#fff;border-color:#d8d7cf}
+body.light .field input,body.light .field select,body.light .field textarea{background:#fff;border-color:#c3c2ba;color:#191a19}
+body.light .btn{background:#191a19;border-color:#191a19;color:#f4f4ef}
+body.light .btn.ghost{background:transparent;color:#3d3f3a;border-color:#c3c2ba}
+body.light .codeblock{background:#f5f4ef;border-color:#d8d7cf;color:#2b2d29}
+body.light .tbl th{color:#63665f;border-bottom-color:#d8d7cf}
+body.light .tbl td{border-bottom-color:#e6e5dd}
+body.light .field label{color:#63665f}
+/* 间距修正 */
+#page-overview > .section-bar:first-child{margin-top:34px}
+#page-overview .section-gap > .section-bar{margin-top:0}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><img class="logo-img" src="./logo.png" alt="Soda AI Studio"><span class="logo-sub">AI STUDIO</span></div>
+    <div class="sidecaption tiny-label">Soda / 01</div>
+    <nav class="nav" aria-label="主导航">
+      <button class="active" data-page="overview"><span>01</span>对齐总览</button>
+      <button data-page="goals"><span>02</span>目标链路</button>
+      <button data-page="people"><span>03</span>每个人的目标</button>
+      <button data-page="my"><span>04</span>我的</button>
+      <button data-page="admin" id="navAdmin"><span>05</span>后台</button>
+      <button data-page="api"><span>06</span>接口</button>
+    </nav>
+    <div class="sidebar-bottom"><strong>ONE DIRECTION.</strong>人与 Agent，<br>围绕同一个方向。</div>
+  </aside>
+
+  <main class="main">
+    <header class="top">
+      <div class="top-left">SODA / <b id="crumb">对齐总览</b></div>
+      <div class="top-right">
+        <button type="button" class="theme-toggle" id="themeToggle">切换白天</button>
+        <span class="demo-label" id="demoLabel">DEMO / 未连接数据</span>
+        <span class="circle">S</span>
+      </div>
+    </header>
+    <nav class="mobile-nav" aria-label="移动端导航">
+      <button class="active" data-page="overview">对齐总览</button>
+      <button data-page="goals">目标链路</button>
+      <button data-page="people">每个人的目标</button>
+      <button data-page="my">我的</button>
+      <button data-page="admin">后台</button>
+      <button data-page="api">接口</button>
+    </nav>
+
+    <div class="wrap">
+      <div class="title-row">
+        <div>
+          <div class="section-code">SODA AI STUDIO / TEAM ALIGNMENT</div>
+          <h1 id="title">一个方向，一起向前。</h1>
+          <p id="subtitle">这里能看到每个人本周、本月的目标，以及它挂在公司的哪个目标下面。</p>
+        </div>
+        <div class="cycle">本周汇报截止<strong id="shortCount">计算中</strong></div>
+      </div>
+
+      <div class="notice" id="notice">
+        <span class="notice-icon">[ ! ]</span>
+        <div><strong>演示模式</strong> · 目标与状态仅为示例，真实业务数据尚未接入。</div>
+      </div>
+
+      <!-- 01 对齐总览 -->
+      <section class="page show" id="page-overview">
+        <div class="section-bar">
+          <div><div class="section-index">01 / AGENT CLUSTER</div><h2>认识你的 Agent 团队</h2></div>
+          <p>公司的四个 AI 角色</p>
+        </div>
+        <div class="cluster-frame">
+          <div class="cards" id="agentCards"></div>
+        </div>
+
+        <div class="section-gap">
+          <div class="section-bar">
+            <div><div class="section-index">02 / ALIGNMENT</div><h2>对齐链路</h2></div>
+            <p>一条链走到底才算在轴上</p>
+          </div>
+          <div class="overview-grid">
+            <div class="alignment">
+              <div class="alignment-title"><h3>目标层级分布</h3><span class="outlined" id="covPill">—</span></div>
+              <div class="steps" id="steps"></div>
+              <div class="alignment-foot">
+                <span id="driftLine">—</span>
+                <button class="link-button" data-page="goals">查看未接入的目标</button>
+              </div>
+            </div>
+            <div class="deadline">
+              <div class="tiny-label">本周汇报截止</div>
+              <strong id="dlBig">—</strong>
+              <p>周日 22:30 前，发给涛哥和 Contana</p>
+              <div class="rule"></div>
+              <div class="monthly"><span>月度会议</span><span>每月最后一个工作日</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 目标链路 -->
+      <section class="page" id="page-goals">
+        <div class="section-bar">
+          <div><div class="section-index">02 / GOAL CHAINS</div><h2>目标链路</h2></div>
+          <p>点「挂上级」把目标接进对齐轴</p>
+        </div>
+        <div class="full-box">
+          <div class="filters" id="filters"></div>
+          <div id="goalRows"></div>
+        </div>
+        <div class="footer-note"><span id="goalSummary"></span></div>
+      </section>
+
+      <!-- 03 人员 -->
+      <section class="page" id="page-people">
+        <div class="section-bar">
+          <div><div class="section-index">01 / EVERYONE'S GOALS</div><h2>每个人的目标</h2></div>
+          <p>每个人当前在推进的周/月目标</p>
+        </div>
+        <div class="cluster-frame people-frame">
+          <div class="cards people-cards" id="peopleCards"></div>
+        </div>
+        <div class="footer-note"><span id="peopleSummary"></span></div>
+      </section>
+      <section class="page" id="page-my">
+        <div class="section-bar"><div><div class="section-index">04 / MY SPACE</div><h2>我的</h2></div>
+          <p>维护自己的信息，写周报月报</p></div>
+        <div class="admin-grid">
+          <div class="admin-card" style="grid-column:span 2">
+            <h3>我的信息</h3>
+            <div class="field"><label>岗位</label><input id="myRole" placeholder="例如 交付 / 产品"></div>
+            <div class="field"><label>一句话介绍</label><input id="myBio" placeholder="你负责什么"></div>
+            <div class="field"><label>头像地址</label><input id="myAvatar" placeholder="./avatars/leo.png"></div>
+            <div class="btn-row"><button class="btn" id="saveProfile">保存信息</button></div>
+          </div>
+          <div class="admin-card">
+            <h3>我的目标</h3>
+            <div id="myGoals"></div>
+            <div class="btn-row"><button class="btn ghost" id="newMyGoal">新建目标</button></div>
+          </div>
+        </div>
+        <div class="section-gap">
+          <div class="section-bar"><div><div class="section-index">04.1 / REPORT</div><h2>写周报 / 月报</h2></div>
+            <p id="reportHint"></p></div>
+          <div class="admin-card">
+            <div class="admin-grid">
+              <div class="field"><label>类型</label><select id="rpKind"><option value="weekly">周报</option><option value="monthly">月报</option></select></div>
+              <div class="field"><label>周期</label><input id="rpCycle" placeholder="2026-W45 / 2026-11"></div>
+            </div>
+            <div id="rpFields"></div>
+            <div class="btn-row">
+              <button class="btn" id="rpSaveDraft">保存草稿</button>
+              <button class="btn ghost" id="rpSubmit">提交给涛哥</button>
+            </div>
+            <p class="note-line" id="rpTip"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-admin">
+        <div class="section-bar"><div><div class="section-index">05 / ADMIN</div><h2>后台管理</h2></div>
+          <p>人员、Agent、账号与接口凭证</p></div>
+        <div class="section-bar"><div><h2 style="font-size:15px">人员</h2></div><p id="adminPeopleN"></p></div>
+        <div class="full-box"><table class="tbl"><thead><tr><th>姓名</th><th>岗位</th><th>团队</th><th>Agent</th><th>管理员</th><th></th></tr></thead><tbody id="adminPeople"></tbody></table>
+          <div class="btn-row"><button class="btn ghost" id="addPerson">新增人员</button></div></div>
+
+        <div class="section-gap"><div class="section-bar"><div><h2 style="font-size:15px">Agent</h2></div><p id="adminAgentsN"></p></div>
+          <div class="full-box"><table class="tbl"><thead><tr><th>名称</th><th>职责</th><th>说明</th><th></th></tr></thead><tbody id="adminAgents"></tbody></table>
+            <div class="btn-row"><button class="btn ghost" id="addAgent">新增 Agent</button></div></div></div>
+
+        <div class="section-gap"><div class="section-bar"><div><h2 style="font-size:15px">账号与凭证</h2></div><p>默认密码 CHANGE_ME_BEFORE_USE，首次登录请改</p></div>
+          <div class="full-box"><table class="tbl"><thead><tr><th>姓名</th><th>角色</th><th>API Token</th><th></th></tr></thead><tbody id="adminUsers"></tbody></table></div></div>
+      </section>
+
+      <section class="page" id="page-api">
+        <div class="section-bar"><div><div class="section-index">06 / API</div><h2>接口</h2></div>
+          <p>员工自己的 agent 可以用 token 直接读写</p></div>
+        <div class="admin-card">
+          <h3>我的凭证</h3>
+          <p class="note-line">请求头带 <code>Authorization: Bearer &lt;token&gt;</code>，即可代表本人调用。</p>
+          <div class="codeblock" id="myToken">读取中…</div>
+        </div>
+        <div class="section-gap"><div class="admin-card"><h3>读</h3><div class="codeblock" id="apiRead"></div></div></div>
+        <div class="section-gap"><div class="admin-card"><h3>写</h3><div class="codeblock" id="apiWrite"></div></div></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<div class="modal-back hidden" id="modalBack">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2 id="mTitle">编辑目标</h2>
+    <p id="mSub"></p>
+    <label for="mParent">对齐上级</label>
+    <select id="mParent"></select>
+    <label for="mStatus">状态</label>
+    <select id="mStatus">
+      <option>进行中</option><option>达成</option><option>未达成</option><option>延期</option><option>已放弃</option>
+    </select>
+    <div class="modal-footer">
+      <button type="button" id="mCancel">取消</button>
+      <button type="button" class="confirm" id="mConfirm">保存</button>
+    </div>
+  </div>
+</div>
+<div class="toast hidden" id="toast"></div>
+
+<script>
+const LEVELS = ['公司大目标','季度目标','月度计划','周目标'];
+const LV = {'公司大目标':'公司','季度目标':'季度','月度计划':'月度','周目标':'周'};
+let DATA = null, filter = 'all', editing = null, focus = null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const person = id => DATA.people.find(p => p.id === id);
+const goal = id => DATA.goals.find(g => g.id === id);
+const kids = id => DATA.goals.filter(g => g.parentId === id);
+const roots = () => DATA.goals.filter(g => g.level === '公司大目标');
+const staff = () => DATA.people.filter(p => !/待补充/.test(p.name));
+
+function chainOf(g){
+  const out = []; let cur = g, n = 0;
+  while (cur && n++ < 20){ out.unshift(cur); cur = cur.parentId ? goal(cur.parentId) : null; }
+  return out;
+}
+function aligned(g){
+  if (g.level === '公司大目标') return true;
+  const c = chainOf(g);
+  return c.length > 1 && c[0].level === '公司大目标';
+}
+function stateOf(g){ return aligned(g) ? '在轴上' : '未接入'; }
+
+function avatarOf(p, cls){
+  if (p && p.avatar) return `<div class="${cls}"><img src="${esc(p.avatar)}" alt=""></div>`;
+  const label = p && /待补充/.test(p.name) ? '空缺' : (p && p.name ? p.name.slice(0,1) : '—');
+  return `<div class="${cls}"><span>${esc(label)}</span></div>`;
+}
+
+/* ── 01 总览 ── */
+function renderOverview(){
+  const agents = DATA.agents || [];
+  $('#agentCards').innerHTML = agents.map(a => {
+    const isWrite = a.role && (a.role.includes('录入') || a.role.includes('写入'));
+    return `<div class="badge-wrap"><div class="badge">
+      <div class="badge-top"><span>${esc(a.name).toUpperCase()}</span><span>${esc((a.role||'AGENT').slice(0,8))}</span></div>
+      <div class="badge-body">
+        ${avatarOf(a, 'avatar')}
+        <h3>${esc(a.name)}</h3>
+        <p class="role">${esc(a.role || '')}</p>
+        <p class="desc">${esc(a.note || '读取目标数据，服务自己的业务')}</p>
+        <div class="badge-foot"><b>${esc(a.role||'Agent')}</b><span>${a.note ? '已说明' : '未说明'}</span></div>
+      </div>
+    </div></div>`;
+  }).join('') || '<div class="empty">还没有配置 agent。</div>';
+
+  const total = DATA.goals.length;
+  const drift = DATA.goals.filter(g => !aligned(g)).length;
+  const onAxis = total - drift;
+  const cov = total ? Math.round(onAxis / total * 100) : 100;
+  $('#covPill').textContent = `${onAxis}/${total} 在轴上`;
+
+  $('#steps').innerHTML = LEVELS.map((l, i) => {
+    const gs = DATA.goals.filter(g => g.level === l);
+    const ok = gs.filter(g => aligned(g)).length;
+    return `<div class="step"><div class="n">L${i + 1}</div><b>${LV[l]}</b>
+      <small>${gs.length} 个目标${gs.length ? ` · ${ok} 已接入` : ''}</small></div>`;
+  }).join('');
+
+  $('#driftLine').textContent = drift
+    ? `${drift} 个目标没挂上级，覆盖率 ${cov}%`
+    : `全部 ${total} 个目标都在轴上`;
+}
+
+/* ── 02 链路 ── */
+function renderGoals(){
+  const tabs = [['all','全部'],['drift','未接入']].concat(LEVELS.map(l => [l, LV[l]]));
+  $('#filters').innerHTML = tabs.map(([k, label]) => {
+    const n = k === 'all' ? DATA.goals.length
+      : k === 'drift' ? DATA.goals.filter(g => !aligned(g)).length
+      : DATA.goals.filter(g => g.level === k).length;
+    return `<button class="filter${filter === k ? ' active' : ''}" data-filter="${k}">${label} ${n}</button>`;
+  }).join('');
+
+  let rows = DATA.goals.slice();
+  if (filter === 'drift') rows = rows.filter(g => !aligned(g));
+  else if (filter !== 'all') rows = rows.filter(g => g.level === filter);
+  rows.sort((a, b) => LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level));
+
+  $('#goalRows').innerHTML = rows.map(g => {
+    const p = person(g.owner);
+    const c = chainOf(g);
+    const chain = c.length > 1
+      ? c.slice(0, -1).map(x => `<span>${esc(x.title)}</span>`).join('') : '';
+    return `<div class="goal-row">
+      <div>
+        <h3>${esc(g.title)}</h3>
+        <p>${LV[g.level]} · ${esc(p ? p.name : '未指派')} · 进度 ${g.progress || 0}%${g.note ? ' · ' + esc(g.note) : ''}</p>
+        ${chain ? `<div class="chain">${chain}</div>` : ''}
+      </div>
+      <div class="goal-actions">
+        <span class="state${aligned(g) ? '' : ' no'}">${stateOf(g)}</span>
+        <button class="action" data-edit="${g.id}">${aligned(g) ? '调整' : '挂上级'}</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">这个分类下没有目标。</div>';
+
+  $('#goalSummary').textContent =
+    `共 ${DATA.goals.length} 个目标，${DATA.goals.filter(g => !aligned(g)).length} 个未接入对齐轴。`;
+}
+
+/* ── 03 人员 ── */
+function renderPeople(){
+  const list = DATA.people;
+  $('#peopleCards').innerHTML = list.map(p => {
+    const gs = DATA.goals.filter(g => g.owner === p.id)
+      .sort((a, b) => LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level));
+    const drift = gs.filter(g => !aligned(g)).length;
+    const vacant = /待补充/.test(p.name);
+    const roleUnknown = !p.role || p.role === '待确认';
+    return `<div class="badge-wrap"><div class="badge" ${vacant ? '' : `data-person="${p.id}"`}
+        style="${focus && focus !== p.id ? 'opacity:.35' : ''}">
+      <div class="badge-top"><span>${vacant ? 'VACANT' : 'SODA'}</span><span>${gs.length} GOALS</span></div>
+      <div class="badge-body">
+        ${avatarOf(p, 'avatar')}
+        <h3>${vacant ? '空缺岗位' : esc(p.name)}</h3>
+        <p class="role">${vacant ? '待认领' : (roleUnknown ? '岗位待确认' : esc(p.role))}</p>
+        <p class="desc">${gs.length ? esc('「' + gs[0].title + '」') : '还没有挂任何目标'}</p>
+        <div class="badge-foot"><b>${gs.length}</b>
+          <span class="${drift ? 'drift' : ''}">${drift ? '游离 ' + drift : (gs.length ? '在轴上' : '无目标')}</span></div>
+      </div>
+    </div></div>`;
+  }).join('');
+  $('#peopleSummary').innerHTML = `共 ${list.length} 个工牌，其中 ${list.length - staff().length} 个空缺。`
+    + (focus ? `　<button class="link-button" id="clearFocus">看全部</button>` : '');
+}
+
+/* ── 弹窗 ── */
+function openModal(id){
+  const g = goal(id); if (!g) return;
+  editing = id;
+  const blocked = new Set();
+  (function mark(x){ kids(x).forEach(function f(y){ blocked.add(y.id); mark(y.id); }); })(id);
+  $('#mTitle').textContent = g.title;
+  $('#mSub').textContent = `${LV[g.level]} · ${(person(g.owner) || {}).name || '未指派'}　当前：${stateOf(g)}`;
+  $('#mParent').innerHTML = ['<option value="">（不挂上级）</option>']
+    .concat(DATA.goals.filter(x => x.id !== id && !blocked.has(x.id))
+      .map(x => `<option value="${x.id}" ${g.parentId === x.id ? 'selected' : ''}>${esc(x.title)}</option>`)).join('');
+  $('#mStatus').value = g.status;
+  $('#modalBack').classList.remove('hidden');
+}
+async function saveModal(){
+  const g = goal(editing); if (!g) return;
+  const r = await fetch('/api/goals', {method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ id: g.id, title: g.title, level: g.level, owner: g.owner,
+      parentId: $('#mParent').value || null, status: $('#mStatus').value,
+      progress: g.progress || 0, note: g.note || '' })});
+  const j = await r.json();
+  $('#modalBack').classList.add('hidden');
+  if (!j.ok) return toast('保存失败：' + j.error);
+  await load();
+  toast(j.aligned ? '已接入对齐轴' : '已保存，仍在轴外');
+}
+function toast(m){ const el = $('#toast'); el.textContent = m; el.classList.remove('hidden');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.add('hidden'), 2200); }
+
+/* ── 导航与主题 ── */
+function goPage(name){
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('show', p.id === 'page-' + name));
+  document.querySelectorAll('[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === name));
+  try{history.replaceState(null,'','#'+name)}catch(_){}
+  const label = { overview: '对齐总览', goals: '目标链路', people: '每个人的目标', my: '我的', admin: '后台管理', api: '接口' }[name] || '';
+  $('#crumb').textContent = label;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.addEventListener('click', e => {
+  const pageBtn = e.target.closest('[data-page]');
+  if (pageBtn){ goPage(pageBtn.dataset.page); return; }
+  const filterBtn = e.target.closest('[data-filter]');
+  if (filterBtn){ filter = filterBtn.dataset.filter; renderGoals(); return; }
+  const editBtn = e.target.closest('[data-edit]');
+  if (editBtn){ openModal(editBtn.dataset.edit); return; }
+  const personBtn = e.target.closest('[data-person]');
+  if (personBtn){
+    focus = focus === personBtn.dataset.person ? null : personBtn.dataset.person;
+    renderPeople(); return;
+  }
+  if (e.target.id === 'clearFocus'){ focus = null; renderPeople(); }
+});
+$('#mCancel').onclick = () => $('#modalBack').classList.add('hidden');
+$('#mConfirm').onclick = saveModal;
+$('#modalBack').onclick = e => { if (e.target.id === 'modalBack') $('#modalBack').classList.add('hidden'); };
+
+$('#themeToggle').onclick = () => {
+  const light = document.body.classList.toggle('light');
+  $('#themeToggle').textContent = light ? '切换黑夜' : '切换白天';
+  try { localStorage.setItem('goalos-theme', light ? 'light' : 'dark'); } catch (_) {}
+};
+try {
+  if (localStorage.getItem('goalos-theme') === 'light'){
+    document.body.classList.add('light');
+    $('#themeToggle').textContent = '切换黑夜';
+  }
+} catch (_) {}
+
+function renderDeadline(){
+  const now = new Date();
+  const d = new Date(now);
+  d.setDate(now.getDate() + ((7 - now.getDay()) % 7));
+  d.setHours(22, 30, 0, 0);
+  if (d <= now) d.setDate(d.getDate() + 7);
+  const h = Math.floor((d - now) / 3600000);
+  const txt = `${Math.floor(h / 24)} 天 ${h % 24} 小时`;
+  $('#shortCount').textContent = txt;
+  $('#dlBig').textContent = txt;
+}
+
+async function load(){
+  const res = await fetch('/api/data');
+  if (!res.ok) { if (res.status === 401) { window.__needAuth = true; if (window.showAuth) window.showAuth(); return; } throw new Error('HTTP ' + res.status); }
+  DATA = await res.json();
+  const demo = DATA.dataStatus === 'demo';
+  $('#demoLabel').textContent = demo ? 'DEMO / 未连接数据' : 'LIVE';
+  $('#notice').classList.toggle('hidden', !demo);
+  renderOverview(); renderGoals(); renderPeople(); renderDeadline();
+}
+
+const initial = (location.hash||'').replace('#','');
+load().then(()=>{ if(initial) goPage(initial); }).catch(e => { document.body.innerHTML = '<p style="padding:40px">读取失败：' + esc(e.message) + '</p>'; });
+setInterval(renderDeadline, 60000);
+</script>
+
+<script>
+(function(){
+  var $ = function(s){ return document.querySelector(s); };
+  var esc = function(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+  var ME = null;
+
+  /* ---- 登录 ---- */
+  function showAuth(){
+    if (document.getElementById('authOverlay')) return;
+    var d = document.createElement('div');
+    d.className = 'auth';
+    d.id = 'authOverlay';
+    d.innerHTML = '<div class="auth-card">'
+      + '<h2>Soda AI Studio</h2><p>用你的姓名登录，维护自己的目标与汇报。</p>'
+      + '<label for="auName">姓名</label><input id="auName" autocomplete="username" placeholder="例如 涛哥">'
+      + '<label for="auPass">密码</label><input id="auPass" type="password" autocomplete="current-password" placeholder="初始密码 CHANGE_ME_BEFORE_USE">'
+      + '<button id="auGo">登录</button><div class="auth-err" id="auErr"></div></div>';
+    document.body.appendChild(d);
+    $('#auGo').onclick = async function(){
+      var r = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ name: $('#auName').value.trim(), password: $('#auPass').value }) });
+      var j = await r.json();
+      if (!j.ok) { $('#auErr').textContent = j.error || '登录失败'; return; }
+      location.reload();
+    };
+    $('#auPass').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('#auGo').click(); });
+  }
+  window.showAuth = showAuth;
+  if (window.__needAuth) { showAuth(); return; }
+
+  ME = (DATA && DATA.me) || null;
+  var GUEST = !(DATA && DATA.loggedIn);
+  if (GUEST) {
+    ['my','admin','api','people'].forEach(function(k){
+      if (k === 'people') return;
+      document.querySelectorAll('[data-page="' + k + '"]').forEach(function(b){ b.style.display = 'none'; });
+    });
+    var tr = document.querySelector('.top-right');
+    if (tr) {
+      var btn = document.createElement('button');
+      btn.className = 'theme-toggle';
+      btn.textContent = '登录 / 管理';
+      btn.onclick = function(){ showAuth(); };
+      tr.insertBefore(btn, tr.firstChild);
+    }
+  }
+  if (ME && !ME.isAdmin) { var na = $('#navAdmin'); if (na) na.style.display = 'none'; }
+
+  /* ---- 我的 ---- */
+  var RP = {
+    weekly: ['本周目标达成','本周结果','本周风险','下周目标','预期结果','潜在风险','所需援助'],
+    monthly: ['本月达成目标','关键成果及链接','Lesson Learned','能力成长','产品建议','市场洞察','开放项','下月计划']
+  };
+  function cycleOf(kind){
+    var now = new Date();
+    if (kind === 'monthly') return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+    var t = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    var day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day);
+    var ys = new Date(Date.UTC(t.getUTCFullYear(),0,1));
+    var wk = Math.ceil(((t - ys)/86400000 + 1)/7);
+    return t.getUTCFullYear() + '-W' + String(wk).padStart(2,'0');
+  }
+  function renderReportForm(){
+    var kind = $('#rpKind').value;
+    if (!$('#rpCycle').value) $('#rpCycle').value = cycleOf(kind);
+    $('#rpFields').innerHTML = RP[kind].map(function(f){
+      return '<div class="field"><label>'+esc(f)+'</label><textarea data-rp="'+esc(f)+'" placeholder="……"></textarea></div>';
+    }).join('');
+    loadReportDraft();
+  }
+  function currentReport(){
+    if (!DATA || !DATA.reports) return null;
+    var c = $('#rpCycle').value, k = $('#rpKind').value;
+    return DATA.reports.find(function(r){ return r.cycle === c && r.kind === k && r.owner === ME.personId; }) || null;
+  }
+  function loadReportDraft(){
+    var r = currentReport();
+    $('#rpFields').querySelectorAll('[data-rp]').forEach(function(el){
+      el.value = (r && r.fields && r.fields[el.dataset.rp]) || '';
+    });
+    $('#rpTip').textContent = r ? ('已有' + (r.status === '已提交' ? '已提交' : '草稿') + '版本，更新于 ' + String(r.updatedAt||'').slice(0,16).replace('T',' ')) : '';
+  }
+  async function saveReport(submit){
+    var fields = {};
+    $('#rpFields').querySelectorAll('[data-rp]').forEach(function(el){ if (el.value.trim()) fields[el.dataset.rp] = el.value.trim(); });
+    var r = await fetch('/api/reports', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ kind: $('#rpKind').value, cycle: $('#rpCycle').value, fields: fields, status: submit ? '已提交' : '草稿' }) });
+    var j = await r.json();
+    if (!j.ok) { alert('保存失败：' + j.error); return; }
+    await load(); renderMy(); alert(submit ? '已提交' : '草稿已保存');
+  }
+  function renderMy(){
+    if (!ME) return;
+    var p = (DATA.people || []).find(function(x){ return x.id === ME.personId; }) || {};
+    $('#myRole').value = p.role || '';
+    $('#myBio').value = p.bio || '';
+    $('#myAvatar').value = p.avatar || '';
+    var mine = (DATA.goals||[]).filter(function(g){ return g.owner === ME.personId; });
+    $('#myGoals').innerHTML = mine.length ? mine.map(function(g){
+      return '<div class="goal-row" style="grid-template-columns:1fr auto"><div><h3 style="font-size:13px">'+esc(g.title)+'</h3>'
+        + '<p>'+esc(g.level)+' · '+esc(g.status)+' · '+(g.aligned?'在轴上':'未接入')+'</p></div>'
+        + '<div class="goal-actions"><button class="btn ghost" onclick="openModal(\''+g.id+'\')">编辑</button></div></div>';
+    }).join('') : '<div class="empty">还没有目标，点下面新建。</div>';
+    $('#reportHint').textContent = '本周截止 周日 22:30';
+    renderReportForm();
+  }
+
+  /* ---- 后台 ---- */
+  var editingPerson = null, editingAgent = null;
+  function renderAdmin(){
+    if (!ME || !ME.isAdmin) return;
+    $('#adminPeopleN').textContent = (DATA.people||[]).length + ' 人';
+    $('#adminPeople').innerHTML = (DATA.people||[]).map(function(p){
+      return '<tr><td>'+esc(p.name)+'</td><td>'+esc(p.role||'—')+'</td><td>'+esc(p.team||'—')+'</td>'
+        + '<td>'+esc(p.agent||'—')+'</td><td>'+(p.isTop?'是':'')+'</td>'
+        + '<td><button class="btn ghost" data-editp="'+p.id+'">编辑</button> '
+        + '<button class="btn danger" data-delp="'+p.id+'">删除</button></td></tr>';
+    }).join('');
+    $('#adminAgentsN').textContent = (DATA.agents||[]).length + ' 个';
+    $('#adminAgents').innerHTML = (DATA.agents||[]).map(function(a){
+      return '<tr><td>'+esc(a.name)+'</td><td>'+esc(a.role||'—')+'</td><td>'+esc(a.note||'—')+'</td>'
+        + '<td><button class="btn ghost" data-edita="'+a.id+'">编辑</button> '
+        + '<button class="btn danger" data-dela="'+a.id+'">删除</button></td></tr>';
+    }).join('');
+    fetch('/api/admin/users/list').then(function(r){ return r.json(); }).then(function(j){
+      if (!j.ok) return;
+      $('#adminUsers').innerHTML = j.users.map(function(u){
+        var p = (DATA.people||[]).find(function(x){ return x.id === u.personId; });
+        return '<tr><td>'+esc(u.name)+'</td><td>'+esc(u.role)+'</td>'
+          + '<td style="font-family:monospace;font-size:11px;color:#8e918a">'+esc(String(u.apiToken).slice(0,10))+'…</td>'
+          + '<td><button class="btn ghost" data-reset="'+u.userId+'">重置密码</button> '
+          + '<button class="btn ghost" data-rotate="'+u.userId+'">换 token</button> '
+          + '<button class="btn ghost" data-role="'+u.userId+'" data-to="'+(u.role==='admin'?'member':'admin')+'">'
+          + (u.role==='admin'?'降为成员':'升为管理员')+'</button></td></tr>';
+      }).join('');
+    });
+  }
+  async function adminPost(path, payload){
+    var r = await fetch(path, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    var j = await r.json();
+    if (!j.ok) { alert('操作失败：' + j.error); return null; }
+    await load(); renderAdmin(); return j;
+  }
+
+  /* ---- 接口 ---- */
+  function renderApi(){
+    var base = location.origin;
+    $('#apiRead').textContent =
+      '# 我的目标\ncurl "' + base + '/api/data" -H "Authorization: Bearer <token>"\n\n'
+      + '# 取全部目标（含是否在轴上：aligned）\ncurl "' + base + '/api/data" -H "Authorization: Bearer <token>" | jq ".goals[] | {title, owner, level, aligned}"';
+    $('#apiWrite').textContent =
+      '# 写周报\ncurl -X POST "' + base + '/api/reports" -H "Authorization: Bearer <token>" \\\n'
+      + '  -H "Content-Type: application/json" \\\n'
+      + '  -d \'{"kind":"weekly","cycle":"2026-W45","status":"已提交","fields":{"本周结果":"…","本周风险":"…"}}\'\n\n'
+      + '# 建目标\ncurl -X POST "' + base + '/api/goals" -H "Authorization: Bearer <token>" \\\n'
+      + '  -H "Content-Type: application/json" -d \'{"title":"…","level":"周目标","parentId":"g_xxx"}\'';
+    fetch('/api/token').then(function(r){ return r.json(); }).then(function(j){
+      $('#myToken').textContent = j.ok ? j.token : '读取失败，请重新登录';
+    }).catch(function(){ $('#myToken').textContent = '读取失败'; });
+  }
+
+  /* ---- 事件 ---- */
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('button'); if (!t) return;
+    if (t.dataset.editp) {
+      var p = DATA.people.find(function(x){ return x.id === t.dataset.editp; });
+      var name = prompt('姓名', p.name); if (name === null) return;
+      var role = prompt('岗位', p.role || ''); if (role === null) return;
+      var agent = prompt('常用 Agent', p.agent || ''); if (agent === null) return;
+      adminPost('/api/admin/people', { id: p.id, name: name, role: role, agent: agent, team: p.team, avatar: p.avatar, isTop: p.isTop });
+    }
+    if (t.dataset.delp) { if (confirm('删除这个人及其账号？')) adminPost('/api/admin/people', { action:'delete', id: t.dataset.delp }); }
+    if (t.dataset.edita) {
+      var a = DATA.agents.find(function(x){ return x.id === t.dataset.edita; });
+      var an = prompt('名称', a.name); if (an === null) return;
+      var ar = prompt('职责', a.role || ''); if (ar === null) return;
+      var anote = prompt('说明', a.note || ''); if (anote === null) return;
+      adminPost('/api/admin/agents', { id: a.id, name: an, role: ar, note: anote, avatar: a.avatar });
+    }
+    if (t.dataset.dela) { if (confirm('删除这个 Agent？')) adminPost('/api/admin/agents', { action:'delete', id: t.dataset.dela }); }
+    if (t.dataset.reset) { if (confirm('把密码重置为 CHANGE_ME_BEFORE_USE？')) adminPost('/api/admin/users', { userId: t.dataset.reset, action:'reset' }); }
+    if (t.dataset.rotate) { if (confirm('重新生成 API token？旧 token 立即失效。')) adminPost('/api/admin/users', { userId: t.dataset.rotate, action:'rotate' }); }
+    if (t.dataset.role) { adminPost('/api/admin/users', { userId: t.dataset.role, action:'role', role: t.dataset.to }); }
+  });
+
+  $('#saveProfile').onclick = async function(){
+    var r = await fetch('/api/profile', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ role: $('#myRole').value, bio: $('#myBio').value, avatar: $('#myAvatar').value }) });
+    var j = await r.json();
+    if (!j.ok) { alert('保存失败：' + j.error); return; }
+    await load(); renderMy(); alert('已保存');
+  };
+  $('#rpKind').onchange = function(){ $('#rpCycle').value = cycleOf($('#rpKind').value); renderReportForm(); };
+  $('#rpCycle').onchange = loadReportDraft;
+  $('#rpSaveDraft').onclick = function(){ saveReport(false); };
+  $('#rpSubmit').onclick = function(){ saveReport(true); };
+  $('#newMyGoal').onclick = async function(){
+    var title = prompt('目标是什么？'); if (!title) return;
+    var r = await fetch('/api/goals', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ title: title, level:'周目标' }) });
+    var j = await r.json();
+    if (!j.ok) { alert(j.error); return; }
+    await load(); renderMy();
+  };
+  $('#addPerson').onclick = async function(){
+    var name = prompt('姓名'); if (!name) return;
+    var role = prompt('岗位', '') || '';
+    await adminPost('/api/admin/people', { name: name, role: role });
+  };
+  $('#addAgent').onclick = async function(){
+    var name = prompt('Agent 名称'); if (!name) return;
+    var role = prompt('职责', '') || '';
+    await adminPost('/api/admin/agents', { name: name, role: role });
+  };
+
+  /* ---- 挂到页面切换上 ---- */
+  var _go = window.goPage || goPage;
+  window.goPage = function(n){
+    if (GUEST && (n === 'my' || n === 'admin' || n === 'api')) { showAuth(); return; }
+    _go(n);
+    if (n === 'my') renderMy();
+    if (n === 'admin') renderAdmin();
+    if (n === 'api') renderApi();
+  };
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-page]');
+    if (b) window.goPage(b.dataset.page);
+  }, true);
+
+  if (!location.hash) goPage('people');
+  if (location.hash === '#login') { showAuth(); return; }
+  if (location.hash === '#my') renderMy();
+  if (location.hash === '#admin') renderAdmin();
+  if (location.hash === '#api') renderApi();
+})();
+</script>
+
+</body>
+</html>

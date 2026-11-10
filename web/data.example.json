@@ -1,0 +1,219 @@
+{
+  "$comment": "目标对齐看板的本地数据源。dataStatus=demo 表示这是给界面设计用的演示数据：只有 company / people 里的Alex Chen与 Sam Lee / agents 四项来自真实信息，goals 全部为占位，不可当作业务事实引用。真实数据接入飞书 Base 后由 sync 覆盖。",
+  "dataStatus": "demo",
+  "company": "Sample Corp",
+  "updatedAt": "2026-11-06",
+  "cycle": "2026-Q4 / 2026-W45",
+  "agents": [
+    {
+      "id": "a_susu",
+      "name": "Agent-01",
+      "role": "目标与汇报录入",
+      "note": "OpenClaw，部署在云端；员工与它对话完成周报/月报录入",
+      "avatar": "./avatars/xiaosusu.png"
+    },
+    {
+      "id": "a_agent2",
+      "name": "Agent-02",
+      "role": "项目管理",
+      "note": "接收周报/月报",
+      "avatar": "./avatars/agent2.png"
+    },
+    {
+      "id": "a_agent3",
+      "name": "Agent-03",
+      "role": "营销",
+      "avatar": "./avatars/agent3.png"
+    },
+    {
+      "id": "a_agent4",
+      "name": "Agent-04",
+      "role": "研发测试",
+      "avatar": "./avatars/agent4.png"
+    }
+  ],
+  "people": [
+    {
+      "id": "p_yu",
+      "name": "Alex Chen",
+      "nickname": "涛哥",
+      "role": "创始人",
+      "team": "",
+      "reportsTo": null,
+      "agent": "",
+      "placeholder": false,
+      "avatar": "./avatars/taoge.png",
+      "isTop": true
+    },
+    {
+      "id": "p_demo1",
+      "name": "Sam Lee",
+      "nickname": "",
+      "role": "待确认",
+      "team": "",
+      "reportsTo": "p_yu",
+      "agent": "",
+      "placeholder": false,
+      "avatar": "./avatars/leo.png"
+    },
+    {
+      "id": "p_eric",
+      "name": "Jordan Wu",
+      "nickname": "",
+      "role": "待确认",
+      "team": "",
+      "reportsTo": "p_yu",
+      "agent": "",
+      "placeholder": false,
+      "avatar": "./avatars/eric.png"
+    },
+    {
+      "id": "p_renlei",
+      "name": "Taylor Kim",
+      "nickname": "",
+      "role": "待确认",
+      "team": "",
+      "reportsTo": "p_yu",
+      "agent": "",
+      "placeholder": false,
+      "avatar": "./avatars/renlei.png"
+    },
+    {
+      "id": "p_zhou",
+      "name": "Morgan Liu",
+      "nickname": "",
+      "role": "待确认",
+      "team": "",
+      "reportsTo": "p_yu",
+      "agent": "",
+      "placeholder": false,
+      "avatar": "./avatars/zhouchaoxiong.png"
+    },
+    {
+      "id": "p_peng",
+      "name": "Casey Zhao",
+      "nickname": "",
+      "role": "待确认",
+      "team": "",
+      "reportsTo": "p_yu",
+      "agent": "",
+      "placeholder": false,
+      "avatar": "./avatars/pengchangyong.png"
+    },
+    {
+      "id": "p_qiao",
+      "name": "Riley Sun",
+      "nickname": "",
+      "role": "待确认",
+      "team": "",
+      "reportsTo": "p_yu",
+      "agent": "",
+      "placeholder": false,
+      "avatar": "./avatars/qiaoqiao.png"
+    },
+    {
+      "id": "p_xiaoq",
+      "name": "Jamie Ho",
+      "nickname": "",
+      "role": "待确认",
+      "team": "",
+      "reportsTo": "p_yu",
+      "agent": "",
+      "placeholder": false,
+      "avatar": "./avatars/xiaoq.png"
+    }
+  ],
+  "goals": [
+    {
+      "id": "g_company_1",
+      "title": "把 SODA 做成客户愿意持续付费的 AI 交付业务",
+      "owner": "p_yu",
+      "level": "公司大目标",
+      "parentId": null,
+      "status": "进行中",
+      "progress": 35,
+      "note": "占位措辞，等涛哥给真实目标",
+      "placeholder": true
+    },
+    {
+      "id": "g_company_2",
+      "title": "建立 AI Native 的工作方式：每个人的产出可被 agent 交接",
+      "owner": "p_yu",
+      "level": "公司大目标",
+      "parentId": null,
+      "status": "进行中",
+      "progress": 20,
+      "note": "占位措辞，等涛哥给真实目标",
+      "placeholder": true
+    },
+    {
+      "id": "g_q_1",
+      "title": "Q4 签约 3 家标杆客户并完成交付",
+      "owner": "p_yu",
+      "level": "季度目标",
+      "parentId": "g_company_1",
+      "status": "进行中",
+      "progress": 33,
+      "note": "",
+      "placeholder": true
+    },
+    {
+      "id": "g_q_2",
+      "title": "全员用上 agent：周报月报 100% 结构化沉淀",
+      "owner": "p_yu",
+      "level": "季度目标",
+      "parentId": "g_company_2",
+      "status": "进行中",
+      "progress": 25,
+      "note": "",
+      "placeholder": true
+    },
+    {
+      "id": "g_m_1",
+      "title": "知识库问答在 2 家客户现场本地化部署跑通",
+      "owner": "p_demo1",
+      "level": "月度计划",
+      "parentId": "g_q_1",
+      "status": "进行中",
+      "progress": 50,
+      "note": "",
+      "placeholder": true
+    },
+    {
+      "id": "g_w_1",
+      "title": "客户验收：10 道问数题全部通过",
+      "owner": "p_demo1",
+      "level": "周目标",
+      "parentId": "g_m_1",
+      "status": "进行中",
+      "progress": 60,
+      "note": "",
+      "placeholder": true
+    },
+    {
+      "id": "g_orphan_1",
+      "title": "整理产品演示视频素材库",
+      "owner": "p_demo1",
+      "level": "周目标",
+      "parentId": null,
+      "status": "进行中",
+      "progress": 70,
+      "note": "故意不挂上级，用于演示偏离告警",
+      "placeholder": true
+    }
+  ],
+  "reports": [
+    {
+      "id": "r_848abc528e",
+      "owner": "p_yu",
+      "kind": "weekly",
+      "cycle": "2026-W45",
+      "fields": {
+        "本周结果": "本地联调通过"
+      },
+      "status": "草稿",
+      "updatedAt": "2026-11-06T10:03:50.292Z"
+    }
+  ],
+  "peopleNote": "真实姓名与头像来自工作区 Goal-OS-黑白像素头像；岗位待确认。"
+}

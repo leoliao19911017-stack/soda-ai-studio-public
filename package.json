@@ -1,0 +1,17 @@
+{
+  "name": "soda-goal-os",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Soda AI Studio · Goal OS（目标与汇报系统）",
+  "scripts": {
+    "start": "node web/server.js",
+    "migrate": "node web/migrations/001_init.js",
+    "test:phase1": "node web/test/phase1.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0"
+  }
+}
